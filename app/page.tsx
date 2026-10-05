@@ -3,8 +3,10 @@
 import Modal from "@/components/Modal/Modal";
 import CustomSelect from "@/components/Select/Select";
 import Tabs from "@/components/Tab/Tab";
+import Tabs2 from "@/components/Tab/Tab2";
 import Tooltip from "@/components/Tooltip/Tooltip";
 import gsap from "gsap";
+import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 const options = [
   { label: "React.js", value: "react" },
@@ -15,6 +17,8 @@ const options = [
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState("");
+  const [activeTab, setActiveTab] = useState("tab1");
+   const tab = useSearchParams().get("tab") || "tab1";
   return (
     <div className="p-6">
       <button
@@ -48,6 +52,18 @@ export default function Home() {
           ]}
           defaultTab="tab1"
           onChange={(tabId) => console.log("Active Tab:", tabId)}
+          className="mt-4"
+        />
+      </div>
+      <div className="mt-4 bg-white">
+        <Tabs2
+          items={[
+            { value: "tab1", label: "Tab 1" },
+            { value: "tab2", label: "Tab 2" },
+            { value: "tab3", label: "Tab 3" },
+          ]}
+          value={activeTab}
+          onChange={setActiveTab}
           className="mt-4"
         />
       </div>
