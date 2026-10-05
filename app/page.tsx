@@ -127,7 +127,7 @@ export default function Home() {
         <Button loading loadingText="Saving...">
           Save
         </Button>
-        <Button fullWidth variant="success">
+        <Button fullWidth variant="success" size="xs">
           Submit
         </Button>
       </div>
