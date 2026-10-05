@@ -165,7 +165,7 @@ export default function CustomSelect({
 
       {/* Dropdown */}
       <div
-        className={`absoluteleft-0z-50w-fulloverflow-hiddenrounded-xlborderborder-zinc-200bg-whitep-1.5shadow-xlshadow-black/10transition-allduration-200ease-outdark:border-zinc-800dark:bg-zinc-950
+        className={`absolute left-0 z-50 w-full overflow-hidden rounded-xl border border-zinc-200 bg-white p-1.5 shadow-xl shadow-black/10 transition-all duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-950
           ${
             direction === "down"
               ? "top-[calc(100%+8px)] origin-top"

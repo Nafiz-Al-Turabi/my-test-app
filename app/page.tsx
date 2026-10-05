@@ -2,6 +2,7 @@
 
 import Modal from "@/components/Modal/Modal";
 import CustomSelect from "@/components/Select/Select";
+import Tooltip from "@/components/Tooltip/Tooltip";
 import gsap from "gsap";
 import React, { useEffect, useRef, useState } from "react";
 const options = [
@@ -28,6 +29,13 @@ export default function Home() {
           onChange={setValue}
           placeholder="Select framework"
         />
+      </div>
+      <div className="mt-4">
+        <Tooltip content="This is a tooltip" position="top">
+          <button className=" rounded-lg bg-blue-500 px-4 py-2 text-white ">
+            Hover me for tooltip
+          </button>
+        </Tooltip>
       </div>
 
       <Modal
