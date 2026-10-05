@@ -1,6 +1,7 @@
 "use client";
 
 import Modal from "@/components/Modal/Modal";
+import MultiSelect from "@/components/Select/MultiSelect";
 import CustomSelect from "@/components/Select/Select";
 import Tabs from "@/components/Tab/Tab";
 import Tabs2 from "@/components/Tab/Tab2";
@@ -14,11 +15,37 @@ const options = [
   { label: "Vue.js", value: "vue" },
   { label: "Nuxt.js", value: "nuxt" },
 ];
+const frameworks = [
+  {
+    label: "React.js",
+    value: "react",
+  },
+  {
+    label: "Next.js",
+    value: "next",
+  },
+  {
+    label: "Vue.js",
+    value: "vue",
+  },
+  {
+    label: "Nuxt.js",
+    value: "nuxt",
+  },
+  {
+    label: "Angular",
+    value: "angular",
+  },
+  {
+    label: "Svelte",
+    value: "svelte",
+  },
+];
 export default function Home() {
   const [isOpen, setIsOpen] = useState(false);
   const [value, setValue] = useState("");
   const [activeTab, setActiveTab] = useState("tab1");
-   const tab = useSearchParams().get("tab") || "tab1";
+  const [selected, setSelected] = useState<string[]>([]);
   return (
     <div className="p-6">
       <button
@@ -67,7 +94,14 @@ export default function Home() {
           className="mt-4"
         />
       </div>
-
+      <div className="w-80">
+        <MultiSelect
+          options={frameworks}
+          value={selected}
+          onChange={setSelected}
+          placeholder="Select frameworks"
+        />
+      </div>
       <Modal
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
