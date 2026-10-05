@@ -2,6 +2,7 @@
 
 import Modal from "@/components/Modal/Modal";
 import CustomSelect from "@/components/Select/Select";
+import Tabs from "@/components/Tab/Tab";
 import Tooltip from "@/components/Tooltip/Tooltip";
 import gsap from "gsap";
 import React, { useEffect, useRef, useState } from "react";
@@ -36,6 +37,19 @@ export default function Home() {
             Hover me for tooltip
           </button>
         </Tooltip>
+      </div>
+
+      <div>
+        <Tabs
+          tabs={[
+            { id: "tab1", label: "Tab 1" },
+            { id: "tab2", label: "Tab 2" },
+            { id: "tab3", label: "Tab 3" },
+          ]}
+          defaultTab="tab1"
+          onChange={(tabId) => console.log("Active Tab:", tabId)}
+          className="mt-4"
+        />
       </div>
 
       <Modal
