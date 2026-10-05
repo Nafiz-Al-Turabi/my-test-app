@@ -1,5 +1,6 @@
 "use client";
 
+import Button from "@/components/Button/Button";
 import Modal from "@/components/Modal/Modal";
 import MultiSelect from "@/components/Select/MultiSelect";
 import CustomSelect from "@/components/Select/Select";
@@ -7,6 +8,7 @@ import Tabs from "@/components/Tab/Tab";
 import Tabs2 from "@/components/Tab/Tab2";
 import Tooltip from "@/components/Tooltip/Tooltip";
 import gsap from "gsap";
+import { ArrowRight, Edit, Plus, Trash2 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 const options = [
@@ -101,6 +103,33 @@ export default function Home() {
           onChange={setSelected}
           placeholder="Select frameworks"
         />
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        <Button>Create User</Button>
+        <Button variant="success">Approve</Button>
+        <Button variant="danger">Delete</Button>
+        <Button variant="warning">Warning</Button>
+        <Button variant="info">View Details</Button>
+        <Button variant="secondary">Cancel</Button>
+        <Button variant="outline">Edit</Button>
+        <Button variant="ghost">More</Button>
+        <Button variant="link">Learn more</Button>
+        <Button leftIcon={<Plus size={18} />}>Add User</Button>
+        <Button variant="danger" leftIcon={<Trash2 size={17} />}>
+          Delete
+        </Button>
+        <Button variant="outline" rightIcon={<ArrowRight size={17} />}>
+          Continue
+        </Button>
+        <Button size="icon" variant="ghost">
+          <Edit size={18} />
+        </Button>
+        <Button loading loadingText="Saving...">
+          Save
+        </Button>
+        <Button fullWidth variant="success">
+          Submit
+        </Button>
       </div>
       <Modal
         isOpen={isOpen}
