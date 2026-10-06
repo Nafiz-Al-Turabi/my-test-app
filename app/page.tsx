@@ -160,7 +160,7 @@ export default function Home() {
           expedita.
         </div>
       </Modal>
-      <div className="min-h-screen flex items-center justify-start bg-zinc-100 dark:bg-zinc-950">
+      <div className="min-h-screen flex items-center justify-start">
         <button
           ref={buttonRef}
           onClick={() => setIsGenieModalOpen(true)}

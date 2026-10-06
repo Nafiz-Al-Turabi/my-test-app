@@ -73,7 +73,7 @@ export default function GenieModal({
             columns: 24,
             rows: 50,
           }}
-          className="relative z-10 w-[92%] max-w-md bg-white dark:bg-zinc-900 rounded-2xl shadow-2xl overflow-hidden p-6"
+          className="relative z-10 w-[92%] max-w-md rounded-2xl shadow-2xl overflow-hidden p-6"
         >
           {children}
         </Genie>
