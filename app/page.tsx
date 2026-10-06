@@ -49,7 +49,7 @@ export default function Home() {
   const [value, setValue] = useState("");
   const [activeTab, setActiveTab] = useState("tab1");
   const [selected, setSelected] = useState<string[]>([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isGenieModalOpen, setIsGenieModalOpen] = useState(false);
   const buttonRef = useRef<HTMLButtonElement>(null);
   return (
     <div className="p-6">
@@ -147,7 +147,6 @@ export default function Home() {
             >
               Cancel
             </button>
-
             <button className="rounded-lg bg-black px-4 py-2 text-white">
               Create
             </button>
@@ -162,45 +161,45 @@ export default function Home() {
         </div>
       </Modal>
       <div className="min-h-screen flex items-center justify-start bg-zinc-100 dark:bg-zinc-950">
-      <button
-        ref={buttonRef}
-        onClick={() => setIsModalOpen(true)}
-        className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg hover:bg-blue-700 transition-colors"
-      >
-        Open Genie Modal
-      </button>
+        <button
+          ref={buttonRef}
+          onClick={() => setIsGenieModalOpen(true)}
+          className="px-6 py-3 bg-blue-600 text-white rounded-xl font-medium shadow-lg hover:bg-blue-700 transition-colors"
+        >
+          Open Genie Modal
+        </button>
 
-      <GenieModal
-        isOpen={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
-        originRef={buttonRef}
-      >
-        <div className="space-y-4">
-          <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
-            Genie Effect Modal
-          </h2>
-          <p className="text-zinc-600 dark:text-zinc-300">
-            This modal uses the classic macOS Genie animation powered by GSAP.
-            It expands from the button and sucks back into it when closed.
-          </p>
+        <GenieModal
+          isOpen={isGenieModalOpen}
+          onClose={() => setIsGenieModalOpen(false)}
+          originRef={buttonRef}
+        >
+          <div className="space-y-4">
+            <h2 className="text-2xl font-bold text-zinc-900 dark:text-white">
+              Genie Effect Modal
+            </h2>
+            <p className="text-zinc-600 dark:text-zinc-300">
+              This modal uses the classic macOS Genie animation.
+              It expands from the button and sucks back into it when closed.
+            </p>
 
-          <div className="flex justify-end gap-3 pt-4">
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white"
-            >
-              Cancel
-            </button>
-            <button
-              onClick={() => setIsModalOpen(false)}
-              className="px-4 py-2 rounded-lg bg-blue-600 text-white"
-            >
-              Confirm
-            </button>
+            <div className="flex justify-end gap-3 pt-4">
+              <button
+                onClick={() => setIsGenieModalOpen(false)}
+                className="px-4 py-2 rounded-lg bg-zinc-200 dark:bg-zinc-700 text-zinc-800 dark:text-white"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={() => setIsGenieModalOpen(false)}
+                className="px-4 py-2 rounded-lg bg-blue-600 text-white"
+              >
+                Confirm
+              </button>
+            </div>
           </div>
-        </div>
-      </GenieModal>
-    </div>  F
+        </GenieModal>
+      </div>
     </div>
   );
 }

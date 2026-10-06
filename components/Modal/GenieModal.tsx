@@ -55,7 +55,7 @@ export default function GenieModal({
     >
       {/* Backdrop */}
       <div
-        className={`fixed inset-0 bg-black/50 backdrop-blur-[2px] transition-opacity duration-500 ease-out ${
+        className={`fixed inset-0   transition-opacity duration-500 ease-out ${
           isOpen ? "opacity-100" : "opacity-0"
         }`}
         onClick={onClose}
@@ -67,7 +67,7 @@ export default function GenieModal({
           open={isOpen}
           origin={originRef.current}
           config={{
-            duration: 650,
+            duration: 500,
             easing: "easeInOut",
             curve: "inOut",
             columns: 24,
@@ -81,4 +81,3 @@ export default function GenieModal({
     </div>
   );
 }
-
