@@ -71,7 +71,7 @@ export default function Modal({
         aria-label={title}
       >
         {/* Header */}
-        <div className="flex shrink-0 items-center justify-between border-b px-6 py-4">
+        <div className="flex shrink-0 items-center justify-between border-b border-gray-200 px-6 py-4">
           <h2 className="text-lg font-semibold text-gray-900">{title}</h2>
 
           <button
@@ -91,7 +91,7 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="shrink-0 border-t bg-white px-6 py-4">{footer}</div>
+          <div className="shrink-0 border-t border-gray-200 bg-white px-6 py-4">{footer}</div>
         )}
       </div>
     </div>
