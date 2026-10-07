@@ -8,7 +8,7 @@ interface ModalProps {
   title?: string;
   children: ReactNode;
   footer?: ReactNode;
-  size?: "sm" | "md" | "lg" | "xl";
+  size?: "sm" | "md" | "lg" | "xl" | "xxl";
 }
 
 export default function Modal({
@@ -51,6 +51,7 @@ export default function Modal({
     md: "max-w-lg",
     lg: "max-w-2xl",
     xl: "max-w-4xl",
+    xxl: "max-w-6xl",
   };
 
   return (
@@ -91,7 +92,9 @@ export default function Modal({
 
         {/* Footer */}
         {footer && (
-          <div className="shrink-0 border-t border-gray-200 bg-white px-6 py-4">{footer}</div>
+          <div className="shrink-0 border-t border-gray-200 bg-white px-6 py-4">
+            {footer}
+          </div>
         )}
       </div>
     </div>
