@@ -138,7 +138,7 @@ export default function Home() {
         isOpen={isOpen}
         onClose={() => setIsOpen(false)}
         title="Create Announcement"
-        size="lg"
+        size="xxl"
         footer={
           <div className="flex justify-end gap-3">
             <button
