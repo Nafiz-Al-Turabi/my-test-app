@@ -47,3 +47,53 @@ body {
   animation: noise-flicker 380ms steps(2, jump-none) forwards;
 }
 @keyframes noise-flicker { 0%{opacity:0} 20%{opacity:.5} 50%{opacity:.7} 100%{opacity:0} }
+/* Hide default browser cursor completely */
+@media (hover: hover) and (pointer: fine) {
+  *,
+  *::before,
+  *::after,
+  html,
+  body,
+  a,
+  button,
+  input,
+  textarea,
+  select {
+    cursor: none !important;
+  }
+}
+
+/* Subtle mouse tracker dot */
+.cursor-core {
+  background: #6ee7b7;
+  box-shadow: 0 0 10px rgba(110, 231, 183, 0.9);
+  will-change: transform, opacity;
+}
+
+/* Motion particles */
+.mouse-trail {
+  background: #6ee7b7;
+  box-shadow: 0 0 18px rgba(110, 231, 183, 0.45);
+  will-change: transform, opacity;
+}
+
+/* Soft radial spotlight */
+.mouse-spotlight {
+  background: radial-gradient(
+    circle,
+    rgba(52, 211, 153, 0.09) 0%,
+    rgba(52, 211, 153, 0.035) 35%,
+    transparent 70%
+  );
+
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+  will-change: transform;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .creative-cursor,
+  .cursor-label {
+    transition: none;
+  }
+}
