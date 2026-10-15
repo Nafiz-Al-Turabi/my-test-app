@@ -12,7 +12,7 @@ export default function OTPpage() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-6">
-      <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm flex flex-col items-center gap-6 max-w-md w-full">
+      <div className="bg-white border border-gray-200 rounded-3xl p-8 shadow-sm flex flex-col items-center gap-6 max-w-xl w-full">
         {/* Title */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl font-bold text-gray-900">Enter OTP</h1>
@@ -23,12 +23,12 @@ export default function OTPpage() {
 
         {/* Clean Reusable OTPInput Call */}
         <OTPInput
-          length={4}
+          length={8}
           boxSize={44}
-          gap={8}
+          gap={10}
           radius={8}
-          successAnimation="flip"
-          errorAnimation="bounce"
+          successAnimation="jackpot"
+          errorAnimation="tornado"
           onComplete={(otp) => console.log("OTP completed:", otp)}
           onVerify={async (otp) => {
             return await verifyOtp(otp);
