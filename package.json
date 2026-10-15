@@ -3,9 +3,9 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
-    "build": "next build",
-    "start": "next start",
+    "dev": "node init && next dev",
+    "build": "node init && next build",
+    "start": "node init && next start",
     "lint": "eslint"
   },
   "dependencies": {
@@ -18,7 +18,7 @@
     "react-dom": "19.2.8",
     "react-icons": "^5.7.0",
     "react-nat-modal": "../My-packages/react-nat-modal/react-nat-modal-1.0.0.tgz",
-    "react-nat-otp": "^1.0.1"
+    "react-nat-otp": "^1.0.2"
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
