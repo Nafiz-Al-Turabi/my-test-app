@@ -1,5 +1,6 @@
 "use client";
 
+import OTPInput from "@/components/OTP/OTPInput";
 import { useEffect, useMemo, useState } from "react";
 
 export interface Product {
