@@ -1,6 +1,6 @@
 "use client";
 
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 
 interface TabItem {
@@ -21,7 +21,7 @@ interface TabsProps {
   indicatorLeftOffset?: number;
 }
 
-export default function Tabs2({
+function Tabs2Inner({
   items,
   value,
   onChange,
@@ -85,5 +85,13 @@ export default function Tabs2({
         </button>
       ))}
     </div>
+  );
+}
+
+export default function Tabs2(props: TabsProps) {
+  return (
+    <Suspense fallback={<div className={`p-1 ${props.className || ""}`} />}>
+      <Tabs2Inner {...props} />
+    </Suspense>
   );
 }

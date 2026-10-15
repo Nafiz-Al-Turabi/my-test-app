@@ -10,7 +10,6 @@ import Tabs2 from "@/components/Tab/Tab2";
 import Tooltip from "@/components/Tooltip/Tooltip";
 import gsap from "gsap";
 import { ArrowRight, Edit, Plus, Trash2 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import React, { useEffect, useRef, useState } from "react";
 const options = [
   { label: "React.js", value: "react" },

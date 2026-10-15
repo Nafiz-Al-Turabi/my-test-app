@@ -1,7 +1,7 @@
 "use client";
-import React from "react";
-import { OTPInput } from "@/components/OTP/OTPInput";
 
+import OTPInput from "react-nat-otp";
+import 'react-nat-otp/styles.css';
 export default function OTPpage() {
   // Real backend API verification function
   const verifyOtp = async (code: string) => {
@@ -23,12 +23,12 @@ export default function OTPpage() {
 
         {/* Clean Reusable OTPInput Call */}
         <OTPInput
-          length={8}
+          length={4}
           boxSize={44}
           gap={8}
           radius={8}
-          successAnimation="jackpot"
-          errorAnimation="shake"
+          successAnimation="flip"
+          errorAnimation="bounce"
           onComplete={(otp) => console.log("OTP completed:", otp)}
           onVerify={async (otp) => {
             return await verifyOtp(otp);
