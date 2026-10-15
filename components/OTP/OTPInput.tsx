@@ -5,19 +5,39 @@ import gsap from "gsap";
 // টেস্ট করার ভ্যালিড কোড
 const VALID_OTPS = ["123456", "999999", "777888"];
 
-type WrongAnimationType =
-  | "cross_headshake"
-  | "domino_collapse"
-  | "glitch_rumble";
+export type SuccessAnimationType =
+  | "merge_checkmark" // ১. মার্জ হয়ে গ্রিন চেক-মার্ক
+  | "morph_pill" // ২. সব বক্স একসাথে জোড়া লেগে একটি মসৃণ ক্যাপসুল/পিল বাটনে রূপান্তর
+  | "domino_flip" // ৩. একের পর এক ৩ডি ডমিনো স্পিন + জেলি বাউন্স
+  | "confetti_burst"; // ৪. মার্জ + চারদিকে কালারফুল কনফেটি ব্লাস্ট
+
+export type WrongAnimationType =
+  | "cross_headshake" // ১. মার্জ হয়ে রেড ক্রস (✕) + হেড শেক
+  | "domino_collapse" // ২. তাস পতন (Domino Fall)
+  | "glitch_rumble" // ৩. iOS স্ন্যাপি গ্লিচ শেক
+  | "liquid_squash" // ৪. জেলি লিকুইড ড্রপ ও স্কোয়াশ
+  | "tornado_spin" // ৫. সাইক্লোন ঘূর্ণি স্পিন ও ছিটকে যাওয়া
+  | "broken_heartbeat"; // ৬. পালসিং এলার্ম হার্টবিট
+
+interface Particle {
+  id: number;
+  x: number;
+  y: number;
+  color: string;
+  size: number;
+}
 
 export default function OTPInput() {
   const [otp, setOtp] = useState<string[]>(Array(6).fill(""));
-  const [status, setStatus] = useState<
-    "idle" | "loading" | "success" | "error"
-  >("idle");
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">(
+    "idle"
+  );
+  const [selectedSuccessStyle, setSelectedSuccessStyle] =
+    useState<SuccessAnimationType>("merge_checkmark");
   const [selectedWrongStyle, setSelectedWrongStyle] =
     useState<WrongAnimationType>("cross_headshake");
   const [apiMessage, setApiMessage] = useState<string>("");
+  const [particles, setParticles] = useState<Particle[]>([]);
 
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -27,6 +47,7 @@ export default function OTPInput() {
   const crossBoxRef = useRef<HTMLDivElement>(null);
   const crossPath1Ref = useRef<SVGPathElement>(null);
   const crossPath2Ref = useRef<SVGPathElement>(null);
+  const particleRefs = useRef<(HTMLSpanElement | null)[]>([]);
 
   // w-10 (40px) এবং gap-2 (8px) অনুযায়ী সেন্টারে মার্জ অফসেট:
   const getMergeOffset = (index: number) => {
@@ -34,27 +55,32 @@ export default function OTPInput() {
     return offsets[index] ?? 0;
   };
 
-  // Real API Verification Function
+  const spawnParticles = () => {
+    const colors = [
+      "#10b981",
+      "#3b82f6",
+      "#f59e0b",
+      "#ec4899",
+      "#8b5cf6",
+      "#06b6d4",
+    ];
+    const items: Particle[] = Array.from({ length: 28 }).map((_, i) => ({
+      id: i,
+      x: 0,
+      y: 0,
+      color: colors[i % colors.length],
+      size: Math.floor(Math.random() * 5) + 4,
+    }));
+    setParticles(items);
+  };
+
+  // Real API Verification
   const verifyWithApi = async (code: string) => {
     setStatus("loading");
     setApiMessage("Verifying code with server...");
 
     try {
-      // -----------------------------------------------------------------------
-      // 🌐 REAL API INTEGRATION POINT:
-      // Replace with your real endpoint, e.g.:
-      // const res = await fetch("/api/auth/verify-otp", {
-      //   method: "POST",
-      //   headers: { "Content-Type": "application/json" },
-      //   body: JSON.stringify({ otp: code }),
-      // });
-      // const data = await res.json();
-      // const isSuccess = res.ok && data.success;
-      // -----------------------------------------------------------------------
-
-      // Simulated network delay (600ms)
-      await new Promise((r) => setTimeout(r, 600));
-
+      await new Promise((r) => setTimeout(r, 500));
       const isSuccess = VALID_OTPS.includes(code);
 
       if (isSuccess) {
@@ -72,14 +98,13 @@ export default function OTPInput() {
 
   useEffect(() => {
     const isCompleted = otp.every((digit) => digit !== "");
-
     if (isCompleted && status === "idle") {
       const enteredOtp = otp.join("");
       verifyWithApi(enteredOtp);
     }
   }, [otp, status]);
 
-  // Handle GSAP animations triggered by status
+  // Handle GSAP animations
   useEffect(() => {
     const inputs = inputRefs.current.filter(Boolean);
     const checkmarkBox = checkmarkBoxRef.current;
@@ -87,6 +112,7 @@ export default function OTPInput() {
     const crossBox = crossBoxRef.current;
     const crossP1 = crossPath1Ref.current;
     const crossP2 = crossPath2Ref.current;
+    const container = containerRef.current;
 
     gsap.killTweensOf([
       inputs,
@@ -95,10 +121,10 @@ export default function OTPInput() {
       crossBox,
       crossP1,
       crossP2,
+      container,
     ]);
 
     if (status === "loading") {
-      // Subtle pulsing while waiting for real API
       gsap.to(inputs, {
         scale: 0.95,
         borderColor: "#3b82f6",
@@ -109,42 +135,164 @@ export default function OTPInput() {
       });
     } else if (status === "success") {
       // ========================================================
-      // 🟢 সঠিক OTP: সব বক্স সেন্টারে মার্জ হয়ে চেক-মার্ক (✓) হবে
+      // 🟢 SUCCESS ANIMATIONS
       // ========================================================
-      const tl = gsap.timeline();
+      if (selectedSuccessStyle === "merge_checkmark") {
+        const tl = gsap.timeline();
 
-      tl.to(inputs, {
-        x: (i) => getMergeOffset(i),
-        scale: 0.82,
-        opacity: 0,
-        borderColor: "#10b981",
-        duration: 0.4,
-        ease: "power3.in",
-      }).fromTo(
-        checkmarkBox,
-        { scale: 0, opacity: 0, rotate: -45 },
-        {
-          scale: 1,
-          opacity: 1,
-          rotate: 0,
-          duration: 0.5,
-          ease: "back.out(2)",
-        },
-        "-=0.1",
-      );
-
-      if (checkPath) {
-        const length = checkPath.getTotalLength() || 40;
-        gsap.fromTo(
-          checkPath,
-          { strokeDasharray: length, strokeDashoffset: length },
+        tl.to(inputs, {
+          x: (i) => getMergeOffset(i),
+          scale: 0.82,
+          opacity: 0,
+          borderColor: "#10b981",
+          duration: 0.4,
+          ease: "power3.in",
+        }).fromTo(
+          checkmarkBox,
+          { scale: 0, opacity: 0, rotate: -45 },
           {
-            strokeDashoffset: 0,
-            duration: 0.35,
-            ease: "power2.out",
-            delay: 0.4,
+            scale: 1,
+            opacity: 1,
+            rotate: 0,
+            duration: 0.5,
+            ease: "back.out(2)",
           },
+          "-=0.1"
         );
+
+        if (checkPath) {
+          const length = checkPath.getTotalLength() || 40;
+          gsap.fromTo(
+            checkPath,
+            { strokeDasharray: length, strokeDashoffset: length },
+            {
+              strokeDashoffset: 0,
+              duration: 0.35,
+              ease: "power2.out",
+              delay: 0.4,
+            }
+          );
+        }
+      } else if (selectedSuccessStyle === "morph_pill") {
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          x: (i) => {
+            const pillOffsets = [10, 6, 2, -2, -6, -10];
+            return pillOffsets[i];
+          },
+          borderColor: "#10b981",
+          backgroundColor: "#ecfdf5",
+          color: "#047857",
+          boxShadow: "0 0 15px rgba(16, 185, 129, 0.4)",
+          borderRadius: (i) =>
+            i === 0 ? "16px 0 0 16px" : i === 5 ? "0 16px 16px 0" : "0",
+          duration: 0.38,
+          ease: "power3.inOut",
+        })
+          .to(inputs, {
+            scale: 1.06,
+            duration: 0.2,
+            ease: "power2.out",
+          })
+          .to(inputs, {
+            scale: 1,
+            backgroundColor: "#d1fae5",
+            duration: 0.35,
+            ease: "bounce.out",
+          });
+      } else if (selectedSuccessStyle === "domino_flip") {
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          rotateY: 360,
+          y: -14,
+          scale: 1.15,
+          borderColor: "#10b981",
+          backgroundColor: "#ecfdf5",
+          color: "#047857",
+          boxShadow: "0 10px 20px rgba(16, 185, 129, 0.35)",
+          duration: 0.45,
+          stagger: 0.06,
+          ease: "back.out(2)",
+        })
+          .to(
+            inputs,
+            {
+              y: 0,
+              scaleX: 1.06,
+              scaleY: 0.94,
+              duration: 0.16,
+              stagger: 0.03,
+              ease: "power2.in",
+            },
+            "-=0.15"
+          )
+          .to(inputs, {
+            scaleX: 1,
+            scaleY: 1,
+            backgroundColor: "#ffffff",
+            duration: 0.4,
+            stagger: 0.03,
+            ease: "elastic.out(1.2, 0.3)",
+          });
+      } else if (selectedSuccessStyle === "confetti_burst") {
+        spawnParticles();
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          x: (i) => getMergeOffset(i),
+          scale: 0.8,
+          opacity: 0,
+          borderColor: "#10b981",
+          duration: 0.38,
+          ease: "power3.in",
+        }).fromTo(
+          checkmarkBox,
+          { scale: 0, opacity: 0, rotate: -60 },
+          {
+            scale: 1,
+            opacity: 1,
+            rotate: 0,
+            duration: 0.5,
+            ease: "back.out(2.4)",
+          },
+          "-=0.1"
+        );
+
+        if (checkPath) {
+          const length = checkPath.getTotalLength() || 40;
+          gsap.fromTo(
+            checkPath,
+            { strokeDasharray: length, strokeDashoffset: length },
+            {
+              strokeDashoffset: 0,
+              duration: 0.3,
+              ease: "power2.out",
+              delay: 0.35,
+            }
+          );
+        }
+
+        setTimeout(() => {
+          const els = particleRefs.current.filter(Boolean);
+          if (els.length > 0) {
+            gsap.fromTo(
+              els,
+              { x: 0, y: 0, opacity: 1, scale: 0 },
+              {
+                x: () => (Math.random() - 0.5) * 260,
+                y: () => -(Math.random() * 110 + 30),
+                scale: () => Math.random() * 1.4 + 0.6,
+                rotation: () => Math.random() * 720 - 360,
+                opacity: 0,
+                duration: 0.9,
+                ease: "power3.out",
+                stagger: { amount: 0.12 },
+              }
+            );
+          }
+        }, 180);
       }
 
       if (successBadgeRef.current) {
@@ -156,17 +304,19 @@ export default function OTPInput() {
             y: 0,
             scale: 1,
             duration: 0.35,
-            delay: 0.6,
+            delay: 0.55,
             ease: "back.out(1.6)",
-          },
+          }
         );
       }
     } else if (status === "error") {
       // ========================================================
-      // 🔴 ভুল OTP: নির্বাচিত অ্যানিমেশন স্টাইল
+      // 🔴 WRONG ANIMATIONS (৬টি ভিন্ন চমৎকার স্টাইল)
       // ========================================================
       if (selectedWrongStyle === "cross_headshake") {
-        // স্টাইল ১: সেন্টারে মার্জ হয়ে রেড ক্রস (✕) তৈরি হবে এবং "না" বলে শেক করবে!
+        // ----------------------------------------------------
+        // ১. মার্জ হয়ে রেড ক্রস (✕) তৈরি হবে এবং "না" বলে শেক করবে
+        // ----------------------------------------------------
         const tl = gsap.timeline();
 
         tl.to(inputs, {
@@ -185,18 +335,17 @@ export default function OTPInput() {
             duration: 0.4,
             ease: "back.out(2)",
           },
-          "-=0.1",
+          "-=0.1"
         );
 
         if (crossP1 && crossP2) {
           gsap.fromTo(
             [crossP1, crossP2],
             { strokeDasharray: 30, strokeDashoffset: 30 },
-            { strokeDashoffset: 0, duration: 0.25, delay: 0.35 },
+            { strokeDashoffset: 0, duration: 0.25, delay: 0.35 }
           );
         }
 
-        // ক্রস বক্সটি "না" বলে মাথা নাড়বে (Head Shake)
         tl.to(crossBox, {
           x: -12,
           duration: 0.08,
@@ -206,7 +355,6 @@ export default function OTPInput() {
           delay: 0.2,
         })
           .to(crossBox, { x: 0, duration: 0.1 })
-          // মিলিয়ে গিয়ে আবার ৬টি বক্সে স্প্লিট হয়ে খুলে যাবে
           .to(crossBox, {
             scale: 0,
             opacity: 0,
@@ -226,7 +374,9 @@ export default function OTPInput() {
             stagger: 0.03,
           });
       } else if (selectedWrongStyle === "domino_collapse") {
-        // স্টাইল ২: ডমিনো পতন
+        // ----------------------------------------------------
+        // ২. ডমিনো তাস পতন (তাস পড়ার মতো ভেঙে ড্রপ হওয়া)
+        // ----------------------------------------------------
         const tl = gsap.timeline();
 
         tl.to(inputs, {
@@ -256,8 +406,10 @@ export default function OTPInput() {
             stagger: 0.04,
             ease: "elastic.out(1.2, 0.4)",
           });
-      } else {
-        // স্টাইল ৩: অ্যাপল হ্যাপটিক গ্লিচ শেক
+      } else if (selectedWrongStyle === "glitch_rumble") {
+        // ----------------------------------------------------
+        // ৩. অ্যাপল হ্যাপটিক গ্লিচ শেক
+        // ----------------------------------------------------
         const tl = gsap.timeline();
 
         tl.to(inputs, {
@@ -279,16 +431,128 @@ export default function OTPInput() {
             duration: 0.1,
             ease: "power2.out",
           });
+      } else if (selectedWrongStyle === "liquid_squash") {
+        // ----------------------------------------------------
+        // ৪. লিকুইড জেলি ড্রপ ও স্কোয়াশ (Liquid Jelly Squash & Spring)
+        // বক্সগুলো নিচে ড্রপ করে চ্যাপ্টা হবে এবং আবার লাফিয়ে উঠবে
+        // ----------------------------------------------------
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          borderColor: "#ef4444",
+          backgroundColor: "#fee2e2",
+          color: "#dc2626",
+          duration: 0.1,
+        })
+          // বাতাসে উঁচুতে উঠে টানটান হওয়া
+          .to(inputs, {
+            y: -14,
+            scaleX: 0.88,
+            scaleY: 1.15,
+            duration: 0.18,
+            stagger: 0.03,
+            ease: "power2.out",
+          })
+          // নিচে সজোরে ড্রপ করে চ্যাপ্টা হয়ে স্কোয়াশ হওয়া
+          .to(inputs, {
+            y: 6,
+            scaleX: 1.25,
+            scaleY: 0.75,
+            duration: 0.15,
+            stagger: 0.03,
+            ease: "power3.in",
+          })
+          // জেলি বাউন্স দিয়ে স্বাভাবিক অবস্থায় রূপান্তর
+          .to(inputs, {
+            y: 0,
+            scaleX: 1,
+            scaleY: 1,
+            duration: 0.5,
+            stagger: 0.03,
+            ease: "elastic.out(1.2, 0.35)",
+          });
+      } else if (selectedWrongStyle === "tornado_spin") {
+        // ----------------------------------------------------
+        // ৫. সাইক্লোন ঘূর্ণি স্পিন (Tornado Vortex Spin)
+        // প্রতিটি বক্স একেক দিকে উল্টো ১৮০ ডিগ্রি স্পিন খেয়ে কাঁপবে
+        // ----------------------------------------------------
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          borderColor: "#ef4444",
+          backgroundColor: "#fef2f2",
+          color: "#b91c1c",
+          duration: 0.1,
+        })
+          .to(inputs, {
+            rotateY: (i) => (i % 2 === 0 ? 180 : -180),
+            scale: 0.85,
+            duration: 0.35,
+            stagger: {
+              each: 0.04,
+              from: "center",
+            },
+            ease: "power3.inOut",
+          })
+          .to(inputs, {
+            rotateY: 0,
+            scale: 1,
+            duration: 0.45,
+            stagger: {
+              each: 0.04,
+              from: "center",
+            },
+            ease: "back.out(2)",
+          });
+      } else if (selectedWrongStyle === "broken_heartbeat") {
+        // ----------------------------------------------------
+        // ৬. পালসিং এলার্ম হার্টবিট (Heartbeat Pulse & Warning Zoom)
+        // দুইবার তীব্র লাল রঙের হৃদস্পন্দনের মতো পালস ও জুম
+        // ----------------------------------------------------
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          borderColor: "#ef4444",
+          backgroundColor: "#fef2f2",
+          color: "#b91c1c",
+          scale: 1.18,
+          boxShadow: "0 0 20px rgba(239, 68, 68, 0.6)",
+          duration: 0.12,
+          ease: "power2.out",
+        })
+          .to(inputs, {
+            scale: 0.95,
+            boxShadow: "0 0 6px rgba(239, 68, 68, 0.2)",
+            duration: 0.12,
+            ease: "power2.in",
+          })
+          .to(inputs, {
+            scale: 1.22,
+            boxShadow: "0 0 24px rgba(239, 68, 68, 0.7)",
+            duration: 0.14,
+            ease: "power2.out",
+          })
+          .to(inputs, {
+            scale: 1,
+            boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
+            duration: 0.35,
+            ease: "elastic.out(1.1, 0.4)",
+          });
       }
     } else {
-      // IDLE: রিসেট
+      // IDLE RESET
+      setParticles([]);
       gsap.to(inputs, {
         x: 0,
         y: 0,
         rotate: 0,
         rotateZ: 0,
+        rotateY: 0,
         scale: 1,
+        scaleX: 1,
+        scaleY: 1,
         opacity: 1,
+        borderRadius: "8px",
         borderColor: "#e5e7eb",
         backgroundColor: "#ffffff",
         boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
@@ -304,7 +568,7 @@ export default function OTPInput() {
         gsap.to(crossBox, { scale: 0, opacity: 0, duration: 0.2 });
       }
     }
-  }, [status, selectedWrongStyle]);
+  }, [status, selectedSuccessStyle, selectedWrongStyle]);
 
   // Handle typing numbers
   const handleChange = (value: string, index: number) => {
@@ -323,7 +587,7 @@ export default function OTPInput() {
       gsap.fromTo(
         inputRefs.current[index],
         { scale: 0.88 },
-        { scale: 1, duration: 0.25, ease: "back.out(2)" },
+        { scale: 1, duration: 0.25, ease: "back.out(2)" }
       );
     }
 
@@ -334,7 +598,7 @@ export default function OTPInput() {
 
   const handleKeyDown = (
     e: React.KeyboardEvent<HTMLInputElement>,
-    index: number,
+    index: number
   ) => {
     if (e.key === "Backspace" && !otp[index] && index > 0) {
       inputRefs.current[index - 1]?.focus();
@@ -377,6 +641,7 @@ export default function OTPInput() {
     setOtp(Array(6).fill(""));
     setStatus("idle");
     setApiMessage("");
+    setParticles([]);
     const inputs = inputRefs.current.filter(Boolean);
     const checkmarkBox = checkmarkBoxRef.current;
     const crossBox = crossBoxRef.current;
@@ -386,8 +651,12 @@ export default function OTPInput() {
       y: 0,
       rotate: 0,
       rotateZ: 0,
+      rotateY: 0,
       scale: 1,
+      scaleX: 1,
+      scaleY: 1,
       opacity: 1,
+      borderRadius: "8px",
       borderColor: "#e5e7eb",
       backgroundColor: "#ffffff",
       boxShadow: "0 1px 3px 0 rgba(0, 0, 0, 0.05)",
@@ -407,7 +676,7 @@ export default function OTPInput() {
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen bg-slate-50 p-4">
-      <div className="flex flex-col items-center gap-7 bg-white border border-gray-200 shadow-sm rounded-3xl p-8 max-w-lg w-full">
+      <div className="flex flex-col items-center gap-6 bg-white border border-gray-200 shadow-sm rounded-3xl p-8 max-w-lg w-full">
         {/* Title */}
         <div className="text-center space-y-1">
           <h1 className="text-2xl font-bold text-gray-900">
@@ -423,6 +692,25 @@ export default function OTPInput() {
           ref={containerRef}
           className="relative flex gap-2 py-4 items-center justify-center min-h-[70px] w-full overflow-visible"
         >
+          {/* Confetti Particles Layer */}
+          <div className="pointer-events-none absolute inset-0 overflow-visible flex items-center justify-center">
+            {particles.map((p, idx) => (
+              <span
+                key={p.id}
+                ref={(el) => {
+                  particleRefs.current[idx] = el;
+                }}
+                className="absolute rounded-full"
+                style={{
+                  width: `${p.size}px`,
+                  height: `${p.size}px`,
+                  backgroundColor: p.color,
+                  opacity: 0,
+                }}
+              />
+            ))}
+          </div>
+
           {/* Centered Green Checkmark Box (Success) */}
           <div
             ref={checkmarkBoxRef}
@@ -442,7 +730,7 @@ export default function OTPInput() {
             </svg>
           </div>
 
-          {/* Centered Red Cross Box (Wrong Style 1: Merge to Cross + Head Shake) */}
+          {/* Centered Red Cross Box (Wrong Style 1) */}
           <div
             ref={crossBoxRef}
             className="absolute z-20 flex items-center justify-center w-10 h-10 rounded-lg bg-red-500 text-white shadow-md shadow-red-500/30 opacity-0 pointer-events-none"
@@ -484,7 +772,7 @@ export default function OTPInput() {
         </div>
 
         {/* Dynamic Status / Feedback Message */}
-        <div className="min-h-8 flex items-center justify-center">
+        <div className="min-h-8 flex items-center justify-center text-center">
           {status === "loading" && (
             <div className="flex items-center gap-2 text-sm font-semibold text-blue-600 animate-pulse">
               <span className="w-2 h-2 rounded-full bg-blue-600 animate-ping" />
@@ -507,10 +795,75 @@ export default function OTPInput() {
           )}
         </div>
 
-        {/* Select Wrong Animation Style Switcher */}
+        {/* Switcher 1: Success Animation Styles */}
         <div className="w-full flex flex-col items-center gap-2 pt-2 border-t border-gray-100">
-          <span className="text-[11px] font-bold text-gray-400 uppercase tracking-wider">
-            Choose Wrong Animation Style:
+          <span className="text-[11px] font-bold text-emerald-700 uppercase tracking-wider">
+            Choose Success Animation:
+          </span>
+          <div className="flex flex-wrap gap-1.5 justify-center">
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSuccessStyle("merge_checkmark");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedSuccessStyle === "merge_checkmark"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              1. Merge Checkmark (✓)
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSuccessStyle("morph_pill");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedSuccessStyle === "morph_pill"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              2. Morphing Capsule
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSuccessStyle("domino_flip");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedSuccessStyle === "domino_flip"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              3. 3D Domino Flip
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSuccessStyle("confetti_burst");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedSuccessStyle === "confetti_burst"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              4. Confetti Burst
+            </button>
+          </div>
+        </div>
+
+        {/* Switcher 2: Wrong Animation Styles (Expanded to 6 Styles!) */}
+        <div className="w-full flex flex-col items-center gap-2 pt-2 border-t border-gray-100">
+          <span className="text-[11px] font-bold text-red-600 uppercase tracking-wider">
+            Choose Wrong Animation (6 Styles):
           </span>
           <div className="flex flex-wrap gap-1.5 justify-center">
             <button
@@ -519,13 +872,13 @@ export default function OTPInput() {
                 setSelectedWrongStyle("cross_headshake");
                 handleReset();
               }}
-              className={`px-3 py-1 text-xs rounded-lg font-medium transition ${
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
                 selectedWrongStyle === "cross_headshake"
                   ? "bg-red-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              1. Merge to Red Cross (✕)
+              1. Merge to Cross (✕)
             </button>
             <button
               type="button"
@@ -533,13 +886,13 @@ export default function OTPInput() {
                 setSelectedWrongStyle("domino_collapse");
                 handleReset();
               }}
-              className={`px-3 py-1 text-xs rounded-lg font-medium transition ${
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
                 selectedWrongStyle === "domino_collapse"
                   ? "bg-red-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              2. Domino Collapse (তাস পতন)
+              2. Domino Collapse
             </button>
             <button
               type="button"
@@ -547,32 +900,74 @@ export default function OTPInput() {
                 setSelectedWrongStyle("glitch_rumble");
                 handleReset();
               }}
-              className={`px-3 py-1 text-xs rounded-lg font-medium transition ${
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
                 selectedWrongStyle === "glitch_rumble"
                   ? "bg-red-600 text-white shadow-sm"
                   : "bg-gray-100 text-gray-600 hover:bg-gray-200"
               }`}
             >
-              3. iOS Snappy Glitch Shake
+              3. iOS Glitch Shake
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedWrongStyle("liquid_squash");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedWrongStyle === "liquid_squash"
+                  ? "bg-red-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              4. Liquid Jelly Squash
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedWrongStyle("tornado_spin");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedWrongStyle === "tornado_spin"
+                  ? "bg-red-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              5. Tornado Vortex Spin
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedWrongStyle("broken_heartbeat");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedWrongStyle === "broken_heartbeat"
+                  ? "bg-red-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              6. Alarm Heartbeat Pulse
             </button>
           </div>
         </div>
 
-        {/* Quick Test Buttons */}
+        {/* Action Buttons */}
         <div className="w-full flex flex-wrap items-center justify-center gap-2 pt-2">
           <button
             type="button"
             onClick={() => fillOtp("123456")}
             className="px-3.5 py-1.5 text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 rounded-lg hover:bg-emerald-100 transition"
           >
-            ✓ Correct (123456)
+            ✓ Test Success (123456)
           </button>
           <button
             type="button"
             onClick={() => fillOtp("000000")}
             className="px-3.5 py-1.5 text-xs font-semibold bg-red-50 text-red-700 border border-red-200 rounded-lg hover:bg-red-100 transition"
           >
-            ✕ Wrong (000000)
+            ✕ Test Selected Wrong (000000)
           </button>
           <button
             type="button"
