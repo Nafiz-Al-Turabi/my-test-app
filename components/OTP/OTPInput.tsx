@@ -9,7 +9,9 @@ export type SuccessAnimationType =
   | "merge_checkmark" // ১. মার্জ হয়ে গ্রিন চেক-মার্ক
   | "morph_pill" // ২. সব বক্স একসাথে জোড়া লেগে একটি মসৃণ ক্যাপসুল/পিল বাটনে রূপান্তর
   | "domino_flip" // ৩. একের পর এক ৩ডি ডমিনো স্পিন + জেলি বাউন্স
-  | "confetti_burst"; // ৪. মার্জ + চারদিকে কালারফুল কনফেটি ব্লাস্ট
+  | "confetti_burst" // ৪. মার্জ + চারদিকে কালারফুল কনফেটি ব্লাস্ট
+  | "ripple_wave" // ৫. গ্রিন রিল্যাক্সিং লিকুইড রিপল ওয়েভ ও জাম্প
+  | "slot_jackpot"; // ৬. ক্যাসিনো জ্যাকপট স্লট স্পিন ও স্টার শাইন
 
 export type WrongAnimationType =
   | "cross_headshake" // ১. মার্জ হয়ে রেড ক্রস (✕) + হেড শেক
@@ -293,6 +295,90 @@ export default function OTPInput() {
             );
           }
         }, 180);
+      } else if (selectedSuccessStyle === "ripple_wave") {
+        // ----------------------------------------------------
+        // ৫. সাইন ওয়েভ লিকুইড রিপল ও এমারেল্ড গ্লো (Ripple Wave)
+        // একের পর এক স্মুথ সাইন ওয়েভ আকারে জাম্প ও এমারেল্ড স্কেল
+        // ----------------------------------------------------
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          y: -18,
+          scaleY: 1.15,
+          scaleX: 0.92,
+          borderColor: "#10b981",
+          backgroundColor: "#d1fae5",
+          color: "#065f46",
+          boxShadow: "0 12px 22px rgba(16, 185, 129, 0.4)",
+          duration: 0.28,
+          stagger: {
+            each: 0.08,
+            ease: "sine.inOut",
+          },
+          ease: "power2.out",
+        })
+          .to(
+            inputs,
+            {
+              y: 0,
+              scaleY: 0.88,
+              scaleX: 1.12,
+              duration: 0.18,
+              stagger: {
+                each: 0.08,
+                ease: "sine.inOut",
+              },
+              ease: "power2.in",
+            },
+            "-=0.25"
+          )
+          .to(inputs, {
+            scaleY: 1,
+            scaleX: 1,
+            backgroundColor: "#ecfdf5",
+            boxShadow: "0 2px 8px rgba(16, 185, 129, 0.2)",
+            duration: 0.35,
+            stagger: 0.04,
+            ease: "elastic.out(1.2, 0.4)",
+          });
+      } else if (selectedSuccessStyle === "slot_jackpot") {
+        // ----------------------------------------------------
+        // ৬. লাকি জ্যাকপট স্লট স্পিন (Jackpot Slot Spin & Victory Bounce)
+        // ক্যাসিনো স্লট মেশিনের মতো উল্লম্ব ৩৬০° ৩ডি রোটেশন + ফাস্ট উইন বাউন্স
+        // ----------------------------------------------------
+        const tl = gsap.timeline();
+
+        tl.to(inputs, {
+          rotateX: 360,
+          scale: 1.2,
+          borderColor: "#10b981",
+          backgroundColor: "#10b981",
+          color: "#ffffff",
+          boxShadow: "0 0 25px rgba(16, 185, 129, 0.6), 0 0 50px rgba(52, 211, 153, 0.3)",
+          duration: 0.45,
+          stagger: {
+            each: 0.07,
+          },
+          ease: "back.out(2.2)",
+        })
+          .to(inputs, {
+            rotateX: 720,
+            scale: 1,
+            backgroundColor: "#ecfdf5",
+            color: "#047857",
+            boxShadow: "0 4px 12px rgba(16, 185, 129, 0.25)",
+            duration: 0.4,
+            stagger: 0.05,
+            ease: "power2.out",
+          })
+          .to(inputs, {
+            y: (i) => (i % 2 === 0 ? -6 : 6),
+            duration: 0.12,
+            stagger: 0.02,
+            yoyo: true,
+            repeat: 1,
+            ease: "power1.inOut",
+          });
       }
 
       if (successBadgeRef.current) {
@@ -548,6 +634,7 @@ export default function OTPInput() {
         rotate: 0,
         rotateZ: 0,
         rotateY: 0,
+        rotateX: 0,
         scale: 1,
         scaleX: 1,
         scaleY: 1,
@@ -856,6 +943,34 @@ export default function OTPInput() {
               }`}
             >
               4. Confetti Burst
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSuccessStyle("ripple_wave");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedSuccessStyle === "ripple_wave"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              5. Liquid Wave
+            </button>
+            <button
+              type="button"
+              onClick={() => {
+                setSelectedSuccessStyle("slot_jackpot");
+                handleReset();
+              }}
+              className={`px-2.5 py-1 text-xs rounded-lg font-medium transition ${
+                selectedSuccessStyle === "slot_jackpot"
+                  ? "bg-emerald-600 text-white shadow-sm"
+                  : "bg-gray-100 text-gray-600 hover:bg-gray-200"
+              }`}
+            >
+              6. Jackpot Spin
             </button>
           </div>
         </div>
